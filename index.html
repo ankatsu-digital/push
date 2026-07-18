@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>アンカツ＋</title>
 
@@ -10,55 +11,76 @@
 
 <body>
 
+
 <h1>🏯 アンカツ＋</h1>
 
 <p>
-通知を受け取るには許可してください。
+プッシュ通知登録
 </p>
+
 
 <button id="btn">
 通知を許可する
 </button>
 
+
 <p id="status"></p>
+
 
 
 <script type="module">
 
+
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-import { 
+
+import {
 getMessaging,
 getToken
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 
+
 // Firebase設定
 const firebaseConfig = {
 
- apiKey:"ここに入力",
+apiKey: "ここに入力",
 
- authDomain:"ここに入力",
+authDomain: "ここに入力",
 
- projectId:"ここに入力",
+projectId: "ここに入力",
 
- storageBucket:"ここに入力",
+storageBucket: "ここに入力",
 
- messagingSenderId:"ここに入力",
+messagingSenderId: "ここに入力",
 
- appId:"ここに入力"
+appId: "ここに入力"
 
 };
 
 
-const app = initializeApp(firebaseConfig);
 
-const messaging = getMessaging(app);
+// Firebase開始
+
+const app =
+initializeApp(firebaseConfig);
 
 
-// ボタン
+const messaging =
+getMessaging(app);
+
+
+
+// GAS URL
+
+const GAS_URL =
+"https://script.google.com/macros/s/AKfycbzqsZ9rI_fYsrijPqj80so1sXpQhjI-BopgPhlR5QDWejyaH1pF0RSa2RUQdS13Owyiww/exec";
+
+
+
+
 
 document
 .getElementById("btn")
@@ -68,16 +90,21 @@ document
 try{
 
 
+// 通知許可
+
 const permission =
 await Notification.requestPermission();
 
 
+
 if(permission !== "granted"){
+
 
 document
 .getElementById("status")
 .innerHTML =
 "通知が許可されませんでした";
+
 
 return;
 
@@ -85,41 +112,74 @@ return;
 
 
 
+
+// FCMトークン取得
+
 const token =
 await getToken(
 messaging,
 {
+
 vapidKey:
-"ここにVAPID公開鍵"
+"ここにVAPIDキー"
+
 }
+
 );
 
 
 
-console.log(token);
+if(!token){
+
+throw new Error(
+"トークン取得失敗"
+);
+
+}
 
 
+
+// 表示
 
 document
 .getElementById("status")
 .innerHTML =
 `
-通知登録完了<br><br>
+登録完了<br><br>
 ${token}
 `;
 
 
 
-// GASへ保存
-/*
-fetch(
-"GASのURL",
+console.log(
+"FCM Token:",
+token
+);
+
+
+
+
+
+// GASへ送信
+
+await fetch(
+GAS_URL,
 {
+
 method:"POST",
-headers:{
-"Content-Type":"application/json"
+
+
+headers:
+{
+
+"Content-Type":
+"application/json"
+
 },
-body:JSON.stringify({
+
+
+body:
+JSON.stringify({
 
 token:token,
 
@@ -127,19 +187,33 @@ device:
 navigator.userAgent
 
 })
+
+
 }
+
 );
-*/
 
 
-}catch(e){
 
-console.error(e);
+console.log(
+"GAS保存完了"
+);
+
+
+
+}
+
+catch(error){
+
+
+console.error(error);
+
 
 document
 .getElementById("status")
 .innerHTML =
-"エラー:"+e;
+"エラー："+error;
+
 
 }
 
@@ -147,8 +221,10 @@ document
 };
 
 
+
 </script>
 
 
 </body>
+
 </html>
