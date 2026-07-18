@@ -2,42 +2,24 @@
 <html lang="ja">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>アンカツ＋ 通知登録</title>
-
+<title>アンカツ＋</title>
 </head>
-
 
 <body>
 
+<h1>🏯 アンカツ＋</h1>
 
-<h1>🏯 ンカツ＋</h1>
+<button id="btn">通知を登録</button>
 
-<p>
-プッシュ通知を受け取る
-</p>
-
-
-<button id="notifyBtn">
-通知を許可する
-</button>
-
-
-<p id="status"></p>
-
+<p id="status">待機中</p>
 
 
 <script type="module">
 
-
-// Firebase
-
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 
 import {
  getMessaging,
@@ -46,199 +28,88 @@ import {
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
 
-
-// Firebase設定
-
+// Firebase設定（あなたのやつ）
 const firebaseConfig = {
-
   apiKey: "AIzaSyCzNeQzzoUuMVhZEzE9IEZ8WgVBcTyNuHc",
-
   authDomain: "test-54a1b.firebaseapp.com",
-
   projectId: "test-54a1b",
-
   storageBucket: "test-54a1b.firebasestorage.app",
-
   messagingSenderId: "401926525341",
-
-  appId: "1:401926525341:web:078a2f16ea8219799e9f74",
-
-  measurementId: "G-MC4CGYGMX2"
-
+  appId: "1:401926525341:web:078a2f16ea8219799e9f74"
 };
 
 
-
-// Firebase初期化
-
-const app =
-initializeApp(firebaseConfig);
+// 初期化
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
 
-// Firebase Messaging
-
-const messaging =
-getMessaging(app);
-
-
-
-
-// GAS URL
-
+// GAS URL（あなたの）
 const GAS_URL =
 "https://script.google.com/macros/s/AKfycbzqsZ9rI_fYsrijPqj80so1sXpQhjI-BopgPhlR5QDWejyaH1pF0RSa2RUQdS13Owyiww/exec";
 
 
 
+// ボタン
+document.getElementById("btn").onclick = async () => {
+
+  const status = document.getElementById("status");
+
+  try {
+
+    status.innerHTML = "許可リクエスト中...";
+
+    // 通知許可
+    const permission = await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      status.innerHTML = "❌ 通知拒否";
+      return;
+    }
+
+    status.innerHTML = "トークン取得中...";
 
 
-document
-.getElementById("notifyBtn")
-.onclick = async()=>{
+    // トークン取得
+    const token = await getToken(messaging, {
+      vapidKey: "BAQyKRS74_KvlFJUrQuOAr4uH2gkUD2hgi0QyPUppPvAOOgYt29mK2GIiUhyty23qXQrWV9d352ivngWjV7FTRs"
+    });
 
 
-try{
+    console.log("TOKEN:", token);
 
 
-// 通知許可
+    if (!token) {
+      status.innerHTML = "❌ トークン取得失敗";
+      return;
+    }
 
-const permission =
-await Notification.requestPermission();
-
-
-
-if(permission !== "granted"){
+    status.innerHTML = "送信中...";
 
 
-document
-.getElementById("status")
-.innerHTML =
-"通知が許可されませんでした";
+    // GAS送信（確実に通す）
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({
+        token: token,
+        device: "Chrome"
+      })
+    });
 
 
-return;
+    status.innerHTML = "✅ 登録完了";
 
-}
+  } catch (e) {
 
+    console.error(e);
+    status.innerHTML = "❌ エラー：" + e;
 
-
-
-
-// FCMトークン取得
-
-const token =
-await getToken(
-messaging,
-{
-
-// Firebase Console
-// Cloud Messaging
-// Web Push証明書のキー
-
-vapidKey:
-"BAQyKRS74_KvlFJUrQuOAr4uH2gkUD2hgi0QyPUppPvAOOgYt29mK2GIiUhyty23qXQrWV9d352ivngWjV7FTRs"
-
-}
-
-);
-
-
-
-
-if(!token){
-
-throw new Error(
-"FCMトークン取得失敗"
-);
-
-}
-
-
-
-
-console.log(
-"FCM Token:",
-token
-);
-
-
-
-document
-.getElementById("status")
-.innerHTML =
-`
-登録完了<br>
-通知を受け取れる状態です
-`;
-
-
-
-
-
-
-// GASへ保存
-
-const result =
-await fetch(
-  GAS_URL,
-  {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify({
-      token: token,
-      device: "Chrome"
-    })
   }
-);
-
-
-body:
-JSON.stringify({
-
-token:token,
-
-device:"Chrome"
-
-})
-
-}
-
-);
-
-
-
-console.log(
-"GAS:",
-await result.text()
-);
-
-
-
-}
-
-catch(error){
-
-
-console.error(error);
-
-
-document
-.getElementById("status")
-.innerHTML =
-"エラー："+error;
-
-
-}
-
-
 
 };
 
-
-
 </script>
 
-
 </body>
-
 </html>
