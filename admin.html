@@ -1,65 +1,118 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
+
 <meta charset="UTF-8">
-<title>アンカツ＋ 通知管理</title>
+
+<title>
+アンカツ＋ 管理画面
+</title>
+
+
 </head>
+
 
 <body>
 
-<h1>アンカツ＋ 通知送信</h1>
 
-<label>
+<h1>
+📢 アンカツ＋通知管理
+</h1>
+
+
+<p>
 タイトル
-</label><br>
-<input id="title" value="アンカツ＋"><br><br>
+</p>
 
-<label>
+<input
+id="title"
+value="アンカツ＋">
+
+
+<p>
 本文
-</label><br>
-<textarea id="body">
+</p>
+
+<textarea
+id="body"
+rows="5">
+
 新しい記事が公開されました
+
 </textarea>
+
 
 <br><br>
 
-<button onclick="sendNotification()">
-通知を送信
+
+<button onclick="send()">
+
+通知送信
+
 </button>
+
+
+
+<p id="result"></p>
+
 
 
 <script>
 
-async function sendNotification(){
 
- const title =
- document.getElementById("title").value;
-
- const body =
- document.getElementById("body").value;
+async function send(){
 
 
- const response = await fetch(
- "ここにCloud FunctionsのURL",
- {
-  method:"POST",
-  headers:{
-   "Content-Type":"application/json"
-  },
-  body:JSON.stringify({
-   title:title,
-   body:body
-  })
- });
+const title =
+document
+.getElementById("title")
+.value;
 
 
- const result = await response.text();
+const body =
+document
+.getElementById("body")
+.value;
 
- alert(result);
+
+
+// GASへ送信
+
+/*
+await fetch(
+"GASのURL",
+{
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+title:title,
+
+body:body
+
+})
+
+});
+*/
+
+
+document
+.getElementById("result")
+.innerHTML =
+"送信処理しました";
+
 
 }
 
+
 </script>
 
+
 </body>
+
 </html>
